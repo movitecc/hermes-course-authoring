@@ -8,7 +8,7 @@
 </style></head>
 <body><header><h1>Hermes 互动学习</h1><div class="muted" id="subtitle">正在加载课程…</div></header><main><div class="layout"><aside class="card sidebar"><h3>课程目录</h3><div class="progress"><i id="bar"></i></div><p class="muted" id="status">进度加载中…</p><div id="lessons"></div></aside><section class="card"><div id="content">正在加载…</div></section></div></main>
 <script>
-let course, current=0, progress={}; const learner='default';
+let course, current=0, progress={}; const learner=localStorage.getItem('hermes_learner')||(()=>{let id='learner-'+crypto.randomUUID(); localStorage.setItem('hermes_learner',id); return id})();
 const BASE=location.pathname.startsWith('/learn')?'/learn':'';
 async function get(url, opt){let r=await fetch(BASE+url,opt); if(!r.ok) throw Error(await r.text()); return r.json()}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
