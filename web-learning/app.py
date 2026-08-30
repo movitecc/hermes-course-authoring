@@ -8,7 +8,7 @@ import urllib.request
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).parent
 COURSE_FILE = ROOT / "course_public.json"
@@ -17,6 +17,7 @@ HERMES_API_BASE = os.environ.get("HERMES_API_BASE", "http://127.0.0.1:18644").rs
 HERMES_API_KEY = os.environ.get("HERMES_API_KEY", "")
 PREMIUM_USER = os.environ.get("PREMIUM_USER", "")
 PREMIUM_PASSWORD = os.environ.get("PREMIUM_PASSWORD", "")
+SYNC_TOKEN = os.environ.get("SYNC_TOKEN", "")
 DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
@@ -42,6 +43,11 @@ def require_premium(handler):
         return True
     handler.send_json({"error": "premium authentication required"}, HTTPStatus.UNAUTHORIZED, challenge=True)
     return False
+
+
+def sync_authorized(handler):
+    token = handler.headers.get("X-Sync-Token", "")
+    return bool(SYNC_TOKEN and hmac.compare_digest(token, SYNC_TOKEN))
 
 
 def hermes_chat(messages):
@@ -105,6 +111,13 @@ class Handler(BaseHTTPRequestHandler):
             with sqlite3.connect(DB_FILE) as db:
                 rows = db.execute("SELECT lesson_id, exercise_id, answer, feedback, completed, updated_at FROM progress WHERE learner=? ORDER BY updated_at", (learner,)).fetchall()
             return self.send_json({"learner": learner, "items": [dict(zip(("lesson_id", "exercise_id", "answer", "feedback", "completed", "updated_at"), r)) for r in rows]})
+        if parsed.path == "/api/sync/telegram":
+            if not sync_authorized(self):
+                return self.send_json({"error": "sync authentication required"}, HTTPStatus.UNAUTHORIZED)
+            learner = parse_qs(parsed.query).get("learner", ["telegram-870720339"])[0][:120]
+            with sqlite3.connect(DB_FILE) as db:
+                rows = db.execute("SELECT lesson_id, exercise_id, answer, feedback, completed, updated_at FROM progress WHERE learner=? ORDER BY updated_at", (learner,)).fetchall()
+            return self.send_json({"learner": learner, "items": [dict(zip(("lesson_id", "exercise_id", "answer", "feedback", "completed", "updated_at"), r)) for r in rows]})
         if parsed.path == "/api/premium/status":
             return self.send_json({"configured": premium_enabled(), "authenticated": authorized(self)})
         if parsed.path in ("/api/ai/explain", "/api/ai/plan"):
@@ -141,6 +154,20 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send_json({"ok": True, "content": hermes_chat([{"role": "user", "content": prompt}])})
             except (ValueError, KeyError, json.JSONDecodeError, urllib.error.URLError) as exc:
                 return self.send_json({"error": "Hermes service unavailable", "detail": str(exc)}, HTTPStatus.BAD_GATEWAY)
+        if parsed.path == "/api/sync/telegram":
+            if not sync_authorized(self):
+                return self.send_json({"error": "sync authentication required"}, HTTPStatus.UNAUTHORIZED)
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                body = json.loads(self.rfile.read(length))
+                learner = str(body.get("learner", "telegram-870720339"))[:120]
+                items = body.get("items", [])
+                with sqlite3.connect(DB_FILE) as db:
+                    for item in items[:200]:
+                        db.execute("INSERT INTO progress(learner, lesson_id, exercise_id, answer, feedback, completed) VALUES(?,?,?,?,?,?) ON CONFLICT(learner, lesson_id, exercise_id) DO UPDATE SET answer=excluded.answer, feedback=excluded.feedback, completed=excluded.completed, updated_at=CURRENT_TIMESTAMP", (learner, str(item["lesson_id"])[:80], str(item.get("exercise_id", "lesson"))[:80], str(item.get("answer", ""))[:10000], str(item.get("feedback", ""))[:10000], int(bool(item.get("completed", True)))))
+                return self.send_json({"ok": True, "learner": learner, "imported": min(len(items), 200)})
+            except (ValueError, KeyError, json.JSONDecodeError) as exc:
+                return self.send_json({"error": f"invalid sync request: {exc}"}, HTTPStatus.BAD_REQUEST)
         if parsed.path != "/api/progress":
             return self.send_json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         try:
