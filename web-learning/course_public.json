@@ -89,7 +89,12 @@
             "A=0,B=1"
           ],
           "correct": 2,
-          "feedback": "A=1、B=1 时无故障 Y=1，故障电路 Y=0，差异才能被观察。"
+          "feedback": "A=1、B=1 时无故障 Y=1，故障电路 Y=0，差异才能被观察。",
+          "model": {
+            "model": "gate_fault",
+            "gate": "AND",
+            "fault": "B stuck-at-0"
+          }
         },
         {
           "id": "l1-transfer",
@@ -247,7 +252,18 @@
             "只有控制容易"
           ],
           "correct": 1,
-          "feedback": "深层逻辑增加控制难度；若没有传播路径或测试点，观察也困难。"
+          "feedback": "深层逻辑增加控制难度；若没有传播路径或测试点，观察也困难。",
+          "model": {
+            "model": "observability",
+            "nodes": [
+              "外部输入",
+              "逻辑级 1",
+              "逻辑级 2",
+              "内部节点 X",
+              "输出 Y"
+            ],
+            "blockedAt": 3
+          }
         },
         {
           "id": "l2-transfer",
@@ -405,7 +421,13 @@
             "110"
           ],
           "correct": 2,
-          "feedback": "每拍新 SI 进入最低位并向高位移动：000→001→010→101。"
+          "feedback": "每拍新 SI 进入最低位并向高位移动：000→001→010→101。",
+          "model": {
+            "model": "scan_chain",
+            "width": 3,
+            "initial": "000",
+            "capture": "101"
+          }
         },
         {
           "id": "l3-transfer",
@@ -564,7 +586,12 @@
             "A=0,B=0,C=1"
           ],
           "correct": 1,
-          "feedback": "先用 B=1 激活故障，再用 A=1、C=0 保证差异传播到 Y。"
+          "feedback": "先用 B=1 激活故障，再用 A=1、C=0 保证差异传播到 Y。",
+          "model": {
+            "model": "atpg",
+            "equation": "Y=(A AND B) OR C",
+            "fault": "B stuck-at-0"
+          }
         },
         {
           "id": "l4-transfer",
@@ -1685,6 +1712,91 @@
           "correct": true,
           "feedback": "Correct. Nice work.",
           "at": "2026-08-29T16:23:44+00:00"
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
         },
         {
           "exerciseId": "e1",
