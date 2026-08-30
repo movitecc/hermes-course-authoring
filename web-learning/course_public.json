@@ -19,6 +19,13 @@
     "了解基本 Verilog/SystemVerilog 阅读方式",
     "具备二进制、布尔代数和基础概率概念"
   ],
+  "sources": [
+    {
+      "url": "file:///mnt/TOSHBA_LINUX/ALIYUN/vlsi-test-principles-and-architectures-design-for-testability-1nbsped-0123705975-9780123705976_compress.pdf",
+      "title": "VLSI Test Principles and Architectures: Design for Testability (2006), ISBN 978-0-12-370597-6",
+      "addedAt": "2026-08-29T23:22:55+00:00"
+    }
+  ],
   "lessons": [
     {
       "id": "l1",
@@ -117,7 +124,12 @@
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "为什么内部节点的可控性和可观察性是 DFT 的核心？"
+          "prompt": "为什么内部节点的可控性和可观察性是 DFT 的核心？",
+          "answer": "测试点后经过逻辑运算结果是否符合预期",
+          "rubric": [
+            "说明可控性：把期望值送到测试点",
+            "说明可观察性：观察逻辑运算后的响应并判断是否符合预期"
+          ]
         }
       ],
       "version": 5,
@@ -288,7 +300,12 @@
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "scan 测试中 Shift 阶段和 Capture 阶段分别做什么？"
+          "prompt": "scan 测试中 Shift 阶段和 Capture 阶段分别做什么？",
+          "answer": "Shift 装载测试状态，Capture 捕获组合逻辑响应",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
       "version": 5,
@@ -454,7 +471,12 @@
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "scan_enable 在移位和捕获时分别处于什么状态？"
+          "prompt": "scan_enable 在移位和捕获时分别处于什么状态？",
+          "answer": "移位为 1，捕获为 0",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
       "version": 5,
@@ -614,17 +636,92 @@
           "title": "课堂回顾",
           "goal": "形成可提取的知识结构",
           "content": "本课建立了一条完整的ATPG推理链。故障激活是在故障点制造正常值与故障值的差异；故障传播是利用非控制值打开逻辑路径，使差异到达输出或scan观察点；故障观察则是通过capture、移位或响应比较实际判定差异。Stuck-at ATPG主要求解逻辑赋值，transition ATPG还必须描述launch前状态、翻转方向和capture时间。解压器减少外部输入数据，compactor减少响应通道，但压缩会引入X污染、aliasing和诊断损失。真正的DFT工程不是追求单一最高覆盖率，而是在模型覆盖、测试时间、功耗、带宽、面积和失效诊断之间建立可验证的平衡。"
+        },
+        {
+          "id": "l4-compression-model",
+          "type": "explain",
+          "title": "压缩的两条链路：激励与响应",
+          "goal": "区分测试激励压缩和响应压缩",
+          "content": "测试压缩不是一个单一电路，而是两条相反方向的链路。测试激励压缩把ATE中的大量原始向量变成少量编码数据，再由片上解压器恢复或展开为扫描链输入；测试响应压缩把多个输出、多个扫描链或多个周期的响应汇聚成较短签名。前者解决“怎么少传”，后者解决“怎么少存、少比”。因此压缩率提高并不自动意味着故障覆盖率提高：解压器必须仍能产生需要的确定性位，响应压缩还要控制aliasing，即坏响应被压成与好响应相同签名的概率。",
+          "reference": "把4条扫描链的同一位位置广播给4个链，可以减少外部移位次数；但如果4条链需要不同位，必须使用更一般的线性解压器或多次加载。响应端用MISR把多个响应折叠成签名，代价是丢失逐位诊断信息。"
+        },
+        {
+          "id": "l4-compression-whiteboard",
+          "type": "whiteboard",
+          "title": "白板推演：为什么压缩会引入风险",
+          "goal": "推导压缩率、测试时间和aliasing的关系",
+          "content": "设原始测试数据量为D，压缩后外部传输量为D_c，压缩率可写成CR=D/D_c。若解压器不能生成某个目标pattern，该pattern对应的故障可能变成未覆盖；若响应压缩把好响应和坏响应映射到同一签名，就发生aliasing。设计目标不是盲目最大化CR，而是在ATE带宽、片上面积、测试时间、覆盖率和诊断分辨率之间取平衡。",
+          "reference": "白板变量：CR↑通常降低外部数据量；解压器约束↑可能降低可生成pattern集合；MISR位数↑通常降低aliasing概率但增加面积；X处理越保守，覆盖和诊断信息越安全但压缩收益可能下降。"
+        },
+        {
+          "id": "l4-compression-quiz",
+          "type": "quiz",
+          "title": "先预测再验证：哪个压缩目标被改善",
+          "goal": "区分数据量、时间和覆盖率",
+          "content": "把每个测试pattern完整发送改成发送seed和控制参数，最直接改善的是哪一项？",
+          "options": [
+            "ATE外部传输与存储数据量",
+            "所有扫描链的内部shift周期都会消失",
+            "故障覆盖率必然提高",
+            "诊断分辨率必然提高"
+          ],
+          "correct": 0,
+          "feedback": "正确。压缩首先减少外部数据搬运；内部shift、覆盖率和诊断能力还取决于解压架构、pattern集合和响应压缩设计。"
+        },
+        {
+          "id": "l4-compression-transfer",
+          "type": "transfer",
+          "title": "迁移任务：设计一条压缩测试链路",
+          "goal": "把压缩概念应用到SoC方案",
+          "content": "为一个有8条扫描链、每条1000位、需要5000个pattern的SoC提出压缩方案。必须说明：激励在哪里压缩、芯片内如何展开、响应在哪里压缩、如何处理X值、如何验证aliasing风险。",
+          "reference": "合格方案至少包含片外编码/压缩、片上解压器、扫描链加载、MISR或空间/时间压缩、X处理策略以及golden signature验证；不能只写“使用压缩算法”。"
+        },
+        {
+          "id": "l4-podem-whiteboard",
+          "type": "whiteboard",
+          "title": "白板推演：D Algorithm 与 PODEM 的搜索差异",
+          "goal": "理解两类ATPG搜索策略",
+          "content": "D Algorithm在电路内部传播五值逻辑，显式维护故障激活与传播的约束，并在冲突时回溯。PODEM把搜索重点放在主输入赋值：先选目标，再反向回溯到输入，利用objective和backtrace构造下一步决策；如果决策导致冲突就换分支。两者都不是“猜一个输入然后看输出”，而是在约束空间中寻找同时满足激活、传播和一致性的赋值。",
+          "reference": "对Y=(A·B)+C中的B stuck-at-0，先建立故障激活目标B=1/ D=1，再选择传播路径并设置非控制值。白板上记录每个决策、隐含赋值、冲突点和回溯分支。"
+        },
+        {
+          "id": "l4-podem-quiz",
+          "type": "quiz",
+          "title": "先预测再验证：为什么需要回溯",
+          "goal": "识别ATPG搜索失败的原因",
+          "content": "ATPG已经让故障点被激活，但传播路径上的另一个输入被设置为控制值，导致故障效应被屏蔽。算法下一步最合理的动作是什么？",
+          "options": [
+            "记录为已检测，不再检查输出",
+            "修改传播路径约束或回溯到上一个决策点",
+            "把所有输入随机翻转",
+            "直接把coverage加一"
+          ],
+          "correct": 1,
+          "feedback": "正确。激活不等于观察；传播被屏蔽时，ATPG必须修改约束或回溯，而不是把故障计入覆盖率。"
+        },
+        {
+          "id": "l4-transition-bridging",
+          "type": "transfer",
+          "title": "迁移任务：为非Stuck-at故障选择时序",
+          "goal": "区分转换故障与桥接故障测试",
+          "content": "请为一个节点的slow-to-rise故障和两条相邻线的bridging fault分别设计测试思路。说明需要的初始化值、发射/捕获时序、相邻线逻辑值以及最终观察点，并指出为什么单周期Stuck-at向量可能不够。",
+          "reference": "转换故障需要先建立初始状态再施加launch transition并在capture窗口观察；桥接故障需要让相邻线形成能激活短接行为的组合，不能只把它当成固定0或固定1。"
         }
       ],
       "exercises": [
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "ATPG 生成测试模式时需要先激活故障还是先传播故障效应？"
+          "prompt": "ATPG 生成测试模式时需要先激活故障还是先传播故障效应？",
+          "answer": "先激活故障，再传播故障效应",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
-      "version": 5,
-      "updatedAt": "2026-08-29T23:23:46+00:00",
+      "version": "5.199999999999999",
+      "updatedAt": "2026-08-30T15:54:45.749905+00:00",
       "teaching": {
         "lessonIntro": "在一块真实芯片上，逻辑仿真通过并不等于制造没有缺陷。某条金属线可能短路后长期呈现0，某个晶体管变慢则只在高速运行时出错。工程师不能逐一观察芯片内部节点，而要利用扫描链、测试控制器和自动测试设备，把内部状态装载进去，再把故障影响带到可测量的输出端。ATPG（Automatic Test Pattern Generation，自动测试向量生成）解决的核心问题不是“枚举所有输入”，而是针对一个明确的故障，构造一条因果链：先让正常电路与故障电路产生差异，再让差异经过逻辑传播，最后在观察点被采样。测试压缩则进一步解决测试数据、测试时间和测试引脚有限的问题，但压缩也可能隐藏错误或被未知值污染。本单元将从故障模型出发，推导激活、传播、观察和压缩之间的关系。",
         "sections": [
@@ -669,6 +766,34 @@
             "workedExample": "设两条scan链各4个触发器，外部每周期只能输入2位。解压器把2位展开为两条链各1位，因此shift 4周期装载8个内部状态。序列可写为：S1=10、S2=01、S3=11、S4=00；每周期scan_en=1、CLK↑，两条链同时移位。随后scan_en=0，在launch/capture阶段施加功能时钟。如果一次capture使大量触发器翻转，峰值功耗超过限制，即使故障覆盖率很好，也不能直接采用。工程师可以选择低翻转填充值，或减少并行capture链；代价是模式数量增加或测试时间变长。最终必须重新做响应压缩和故障仿真，确认没有因改动而丢失目标覆盖。",
             "misconception": "“测试模式只要逻辑上能检测故障，就可以直接上产线”不正确。逻辑可检测性还必须经过scan协议、时钟、X处理、电压频率、功耗和ATE接口约束检查。一个模式可能在理想仿真中有效，却因capture时序不满足、响应被X遮蔽或功耗过高而不适合生产。",
             "check": "某模式新增检测了20个transition fault，但capture峰值功耗超过限制且需要额外时钟域控制。你会如何评估是否保留它？请至少列出覆盖收益、测试风险、时间成本和诊断价值四项。"
+          },
+          {
+            "title": "测试压缩的双向因果链",
+            "explanation": "激励压缩减少传输，响应压缩减少比较和存储；二者共享测试访问结构但风险不同。",
+            "workedExample": "用CR、MISR长度、可生成pattern集合和aliasing概率四个指标比较两种架构。",
+            "misconception": "压缩率高不等于测试时间、覆盖率和诊断能力都更好。",
+            "check": "给出一个压缩方案，并指出它牺牲了什么。"
+          },
+          {
+            "title": "X值与别名风险",
+            "explanation": "未知值可能污染签名，简单丢弃X又可能掩盖故障；工程方案要在X-blocking、X-masking和信息保留之间选择。",
+            "workedExample": "比较“直接进入MISR”和“先屏蔽X再进入MISR”两种路径的误判风险。",
+            "misconception": "签名匹配只说明压缩后的观测相同，不等于每一位响应都正确。",
+            "check": "为什么MISR位数增加通常会降低aliasing概率？"
+          },
+          {
+            "title": "D Algorithm、PODEM与回溯",
+            "explanation": "D Algorithm显式传播故障逻辑值，PODEM则在主输入空间中进行目标驱动搜索；二者都需要处理隐含赋值、冲突和回溯。",
+            "workedExample": "对一个含与门、或门的小电路，逐步标记故障激活目标、传播目标、backtrace输入和冲突分支。",
+            "misconception": "ATPG不是随机试向量；一个候选向量必须经过激活、传播和观察验证。",
+            "check": "指出一个传播被控制值屏蔽的节点，并说明应回溯哪个决策。"
+          },
+          {
+            "title": "Transition与Bridging故障测试",
+            "explanation": "转换故障依赖时间序列和launch/capture，桥接故障依赖相邻网络的联合逻辑状态；它们不能被单一Stuck-at向量完整替代。",
+            "workedExample": "比较slow-to-rise的两拍测试与相邻线桥接的组合激活测试。",
+            "misconception": "非Stuck-at故障不是把故障名称换掉，而是要改变激励和观察时序。",
+            "check": "为什么只执行一个静态逻辑向量可能漏掉transition fault？"
           }
         ],
         "summary": "本课建立了一条完整的ATPG推理链。故障激活是在故障点制造正常值与故障值的差异；故障传播是利用非控制值打开逻辑路径，使差异到达输出或scan观察点；故障观察则是通过capture、移位或响应比较实际判定差异。Stuck-at ATPG主要求解逻辑赋值，transition ATPG还必须描述launch前状态、翻转方向和capture时间。解压器减少外部输入数据，compactor减少响应通道，但压缩会引入X污染、aliasing和诊断损失。真正的DFT工程不是追求单一最高覆盖率，而是在模型覆盖、测试时间、功耗、带宽、面积和失效诊断之间建立可验证的平衡。",
@@ -776,7 +901,12 @@
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "MBIST 中 March 算法为什么要包含升序和降序访问？"
+          "prompt": "MBIST 中 March 算法为什么要包含升序和降序访问？",
+          "answer": "覆盖地址译码和耦合等方向相关故障",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
       "version": 5,
@@ -921,17 +1051,51 @@
           "title": "课堂回顾",
           "goal": "形成可提取的知识结构",
           "content": "本课解决了一个表面简单、实际涉及多个层次的问题：如何在有限ATE带宽和测试时间下，对大型数字芯片施加足够有效的测试。LBIST通过PRPG在片上展开输入，通过扫描链和capture激励逻辑，再由MISR把大量响应压缩成signature，从而减少外部测试数据与期望响应存储。真正判断一个故障是否能被检测，必须依次检查故障激活、故障传播和故障观察；随机模式只是在这些条件较容易满足时有效。MISR提高了输出压缩效率，却引入aliasing和诊断信息损失；X处理能稳定签名，却可能遮蔽故障。工业设计通常把随机LBIST、测试点、确定性top-up、功耗控制和安全锁定结合起来，在覆盖率、压缩率、时间、面积、误判率和风险之间取平衡，而不是单独追求某一个最大值。"
+        },
+        {
+          "id": "l6-misr-aliasing",
+          "type": "explain",
+          "title": "MISR签名为什么可能误判",
+          "goal": "理解signature与aliasing",
+          "content": "MISR不是无损记录器，而是一个有限长度的线性压缩器。每个响应序列经过相同的移位和异或反馈后得到一个签名；不同序列理论上可能得到相同签名，这就是aliasing。对近似随机的错误序列，签名长度为m时，aliasing概率常用约2^-m作直观估计，但真实概率还受故障相关性、X值和多项式选择影响。",
+          "reference": "若两个响应序列之差经过MISR后为全零，二者就会产生同一签名。增加寄存器位数、选择合适反馈多项式、减少X污染都能降低风险，但不能把压缩器变成逐位比较器。"
+        },
+        {
+          "id": "l6-lfsr",
+          "type": "interactive",
+          "title": "动手实验：判断LFSR是否最大长度",
+          "goal": "把反馈多项式与状态周期联系起来",
+          "content": "给定4位LFSR和反馈多项式 x^4+x^3+1，记录从非零seed出发的状态，判断是否回到seed前遍历全部15个非零状态。观察全零状态为什么不能作为普通线性反馈LFSR的有效seed。",
+          "model": {
+            "model": "lfsr",
+            "state": "1011",
+            "taps": "x^4+x^3+1"
+          },
+          "reference": "实验记录应包括每拍状态、是否重复、周期长度和全零状态行为。不要只看生成了几个状态，要检查是否在重复前覆盖全部非零状态。"
+        },
+        {
+          "id": "l6-lbist-transfer",
+          "type": "transfer",
+          "title": "迁移任务：为LBIST补上确定性补测",
+          "goal": "理解伪随机覆盖的边界",
+          "content": "某电路的LBIST运行1000个伪随机pattern后，Stuck-at覆盖率达到92%，但12个稀有控制故障仍未覆盖。请设计“伪随机 + deterministic top-up”的流程，并说明为什么不能只无限增加随机周期。",
+          "reference": "合理方案应包含故障列表分析、稀有故障的确定性pattern、seed/控制配置、额外测试时间和最终覆盖率重算。"
         }
       ],
       "exercises": [
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "LBIST 中 PRPG 和 MISR 分别承担什么职责？"
+          "prompt": "LBIST 中 PRPG 和 MISR 分别承担什么职责？",
+          "answer": "PRPG 生成伪随机激励，MISR 压缩响应为签名",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
-      "version": 5,
-      "updatedAt": "2026-08-29T23:23:46+00:00",
+      "version": "5.1",
+      "updatedAt": "2026-08-30T15:52:52.318523+00:00",
       "teaching": {
         "lessonIntro": "制造测试中的一个核心矛盾是：芯片内部有数百万个触发器和组合逻辑，但测试设备通过有限的引脚和扫描链向芯片输入、读取输出。若完全依赖外部自动测试向量生成（ATPG），测试数据量、加载时间和测试仪存储都会快速增长；若只使用伪随机测试，又可能遗漏随机难测故障。LBIST（Logic Built-In Self-Test，逻辑内建自测试）试图把模式生成、响应分析和测试控制部分搬入芯片内部，但这并不是简单地“加一个随机数发生器”。工程师必须理解测试模式如何激活故障、故障效应如何传播到可观察点、响应如何被压缩，以及压缩过程中为什么会发生aliasing（混叠）。本课将从这些因果链出发，分析LBIST如何减少数据搬运和ATE（Automatic Test Equipment，自动测试设备）负担，又为什么通常需要确定性补测、测试点、X处理和严格的功耗与安全约束。",
         "sections": [
@@ -976,6 +1140,13 @@
             "workedExample": "假设方案A使用32位PRPG和32位MISR，运行10000个pattern；方案B使用64位MISR、运行20000个pattern，并加入4个测试点。方案A外部输入为seed、控制字和32位签名，硬件较小、时间较短，但某个随机命中概率为1/10000的故障在一次运行中只有约63%的机会被激活。方案B把运行次数翻倍，理想命中概率约为1-(1-1/10000)^20000，约为86.5%，同时更宽签名降低理想随机混叠风险；但动态切换次数、测试时间和功耗也接近翻倍，测试点还增加面积和时序验证工作。若该故障在量产中风险很高，方案B可能值得；若芯片对ATE时间极敏感，则可采用方案A加一组确定性top-up，而不是所有芯片都执行两倍LBIST。",
             "misconception": "误解：只要报告的故障覆盖率更高，方案就一定更优。错误原因是覆盖率模型可能忽略X、时序、功耗、aliasing、测试时间和诊断能力。一个高覆盖率方案若导致测试峰值功耗引发良品误判，或需要不可接受的ATE时间，仍不是可量产方案。覆盖率必须与测试质量、成本和风险一起评估。",
             "check": "若增加测试pattern使覆盖率从98%提升到99%，但测试时间增加40%、峰值功耗增加30%，你会要求哪些额外数据后再决定是否采用？至少列出故障类型分布、漏测风险、ATE成本、功耗约束和top-up替代方案。"
+          },
+          {
+            "title": "LFSR、MISR与aliasing",
+            "explanation": "LFSR负责产生模式，MISR负责累积响应；两者都是线性状态机，但目标和反馈使用方式不同。",
+            "workedExample": "用状态表验证一个4位LFSR的周期，再用两个响应序列解释MISR碰撞。",
+            "misconception": "伪随机并不等于覆盖均匀，签名匹配也不等于逐位正确。",
+            "check": "解释seed、周期、反馈多项式和aliasing之间的关系。"
           }
         ],
         "summary": "本课解决了一个表面简单、实际涉及多个层次的问题：如何在有限ATE带宽和测试时间下，对大型数字芯片施加足够有效的测试。LBIST通过PRPG在片上展开输入，通过扫描链和capture激励逻辑，再由MISR把大量响应压缩成signature，从而减少外部测试数据与期望响应存储。真正判断一个故障是否能被检测，必须依次检查故障激活、故障传播和故障观察；随机模式只是在这些条件较容易满足时有效。MISR提高了输出压缩效率，却引入aliasing和诊断信息损失；X处理能稳定签名，却可能遮蔽故障。工业设计通常把随机LBIST、测试点、确定性top-up、功耗控制和安全锁定结合起来，在覆盖率、压缩率、时间、面积、误判率和风险之间取平衡，而不是单独追求某一个最大值。",
@@ -1077,7 +1248,12 @@
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "JTAG 的 EXTEST 指令主要用于什么？"
+          "prompt": "JTAG 的 EXTEST 指令主要用于什么？",
+          "answer": "板级互连测试",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
       "version": 5,
@@ -1221,17 +1397,53 @@
           "title": "课堂回顾",
           "goal": "形成可提取的知识结构",
           "content": "本课解决了一个核心工程问题：如何把 SRAM 内部不可见的制造缺陷，转化为可控制、可传播、可观察的测试行为。通过区分故障激活、故障传播和故障观察，可以理解为什么必须组合不同数据背景、地址方向和读写操作；通过 March 序列，可以从故障模型推导测试步骤；通过 MBIST 状态机，可以把抽象算法落实到带读延迟的逐周期控制。最后，测试方案必须同时面对覆盖率、测试时间、功耗、面积、时序和诊断能力，而不能把单一覆盖率当作量产成功的充分条件。"
+        },
+        {
+          "id": "l8-flow-coverage",
+          "type": "whiteboard",
+          "title": "白板推演：覆盖率不是质量的同义词",
+          "goal": "区分coverage、defect level和yield",
+          "content": "故障覆盖率通常表示被测试检测到的已建模故障比例，defect level描述流到客户的实际缺陷风险，yield描述制造过程中合格芯片比例。三者相关但不相等。提高覆盖率可能增加测试时间、面积和功耗；如果故障模型遗漏了真实缺陷，覆盖率再高也不能保证产品质量。",
+          "reference": "设计评审时至少同时报告fault coverage、test time、power、area、diagnostic resolution和预计defect escape，而不是只展示一个百分比。"
+        },
+        {
+          "id": "l8-budget-transfer",
+          "type": "transfer",
+          "title": "迁移任务：做DFT预算决策",
+          "goal": "在工程约束下做方案权衡",
+          "content": "给定三个候选方案：A覆盖率高但测试时间长，B压缩率高但诊断信息少，C面积小但低功耗模式覆盖不足。请根据“量产筛选、失效分析、ATE成本、功耗限制”四个场景分别选择方案并说明依据。",
+          "reference": "没有脱离目标的唯一最优方案；必须先定义产品阶段和失效代价，再比较coverage、time、power、area、compression和diagnosis。"
+        },
+        {
+          "id": "l8-metrics-quiz",
+          "type": "quiz",
+          "title": "先预测再验证：指标边界",
+          "goal": "识别指标不能推出的结论",
+          "content": "某测试集的Stuck-at fault coverage为99%。以下哪项结论不能直接由此推出？",
+          "options": [
+            "在该故障模型和故障列表下，大部分故障可被检测",
+            "所有物理缺陷都能被发现",
+            "可以继续评估测试时间和功耗",
+            "还需要关注未建模故障和缺陷逃逸"
+          ],
+          "correct": 1,
+          "feedback": "正确。coverage只针对给定模型和故障列表，不等于对所有物理缺陷的保证。"
         }
       ],
       "exercises": [
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "DFT signoff 除了故障覆盖率还应关注哪些量产指标？"
+          "prompt": "DFT signoff 除了故障覆盖率还应关注哪些量产指标？",
+          "answer": "测试功耗、测试时间、pattern 数量、面积时序和诊断能力",
+          "rubric": [
+            "概念准确",
+            "说明工程含义"
+          ]
         }
       ],
-      "version": 5,
-      "updatedAt": "2026-08-29T23:23:46+00:00",
+      "version": "5.1",
+      "updatedAt": "2026-08-30T15:52:52.318523+00:00",
       "teaching": {
         "lessonIntro": "在数字芯片中，DFT（Design for Test，可测试性设计）真正困难的地方，不是把 scan、MBIST 或 JTAG 模块接进 RTL，而是把“芯片内部发生了什么”转化为量产设备 ATE（Automatic Test Equipment，自动测试设备）能够施加、捕获并判定的电信号。以 SRAM 为例，存储单元数量大、内部节点不可直接访问，而且不同故障需要不同的读写顺序才能激活并观察。若只追求故障覆盖率，可能得到过长的测试时间、过高的移位功耗或不可接受的面积。本课将从故障的激活、传播、观察出发，推导 March 算法、MBIST 控制器、地址和数据背景的作用，并把它们放回 RTL 到量产的完整流程中。",
         "sections": [
@@ -1276,6 +1488,13 @@
             "workedExample": "设一条 4-bit scan 链，测试模式下 shift clock 为 10 ns。T0 置 test_mode=1、scan_enable=1；T1 输入 sdi=1，链状态由 0000 变为 0001；T2 输入 0，变为 0010；T3 输入 1，变为 0101；T4 输入 1，变为 1011。随后在 T5 将 scan_enable 拉低，进入 capture，施加功能时钟 pulse=1，组合逻辑响应被锁存；T6 再拉高 scan_enable，通过 4 个 shift 周期把 sdo 逐位移出。若在 T5 仍保持 scan_enable=1，电路不会按预期捕获功能响应；若 shift 频率过高，移位功耗可能超过限制。这里 scan 链验证属于设计验证，而 ATE 上对真实芯片施加这些时序并统计 fail、良率和失效地址，属于制造测试。",
             "misconception": "误解：只要 scan stuck-at 覆盖率达到目标，整个 DFT 就签核完成。错误在于 SRAM 内部故障通常由 MBIST 覆盖，transition、功耗、测试时间、压缩模式、时钟域和诊断结果仍可能失败。DFT signoff 是多目标约束下的工程决策，而不是单一覆盖率门槛。",
             "check": "某方案把 stuck-at coverage 提高了 1%，但 pattern 数量增加 40%，capture 功耗超过限制且无法稳定上 ATE。你会接受该方案吗？请列出需要重新评估或折中的至少三个指标。"
+          },
+          {
+            "title": "DFT指标与量产决策",
+            "explanation": "coverage、yield、defect level、test time、power和diagnosis描述不同侧面，必须放在同一预算表中讨论。",
+            "workedExample": "比较三个DFT方案在量产筛选和失效分析中的不同价值，而不是只按coverage排序。",
+            "misconception": "99%覆盖率不是99%产品质量。",
+            "check": "为一款低功耗SoC写出至少五个DFT评审指标。"
           }
         ],
         "summary": "本课解决了一个核心工程问题：如何把 SRAM 内部不可见的制造缺陷，转化为可控制、可传播、可观察的测试行为。通过区分故障激活、故障传播和故障观察，可以理解为什么必须组合不同数据背景、地址方向和读写操作；通过 March 序列，可以从故障模型推导测试步骤；通过 MBIST 状态机，可以把抽象算法落实到带读延迟的逐周期控制。最后，测试方案必须同时面对覆盖率、测试时间、功耗、面积、时序和诊断能力，而不能把单一覆盖率当作量产成功的充分条件。",
@@ -1377,17 +1596,46 @@
           "title": "课堂回顾",
           "goal": "形成可提取的知识结构",
           "content": "本课建立了一条完整链路：测试模式先通过写入和状态转换激活故障，再让错误沿存储器读出路径传播，最后在输出或压缩响应处观察；故障仿真用这种差异判断检测能力，诊断则把地址、数据背景、读写方向和时间关系转化为候选故障约束。对memory而言，失败分布可映射为坏单元、坏行、坏列或共享外围问题。BIRA依据失败集合与备用行列的覆盖关系做修复判定，BISR通过shift、capture、update以及熔丝或寄存器配置把映射带入正常访问。最终工程目标不是孤立地最大化覆盖率，而是在诊断分辨率、修复可靠性、测试成本、面积、启动行为和良率之间取得可验证的平衡。"
+        },
+        {
+          "id": "l9-fault-collapsing",
+          "type": "explain",
+          "title": "故障折叠：为什么可以少模拟一些故障",
+          "goal": "理解等价与支配关系",
+          "content": "故障模拟面对的故障数量可能随门数快速增长。若两个故障对所有输入都产生相同外部行为，它们可以视为等价故障，只保留一个代表；若检测某故障必然检测另一个故障，则可利用支配关系减少模拟集合。故障折叠降低计算量，但必须保留折叠映射，否则覆盖率报告会失去原始故障集合的含义。",
+          "reference": "与门输入的某些stuck-at故障可通过逻辑关系识别等价或支配候选；实际折叠前要明确故障模型、可观察输出和结构假设。"
+        },
+        {
+          "id": "l9-sim-methods",
+          "type": "whiteboard",
+          "title": "白板推演：四种故障仿真视角",
+          "goal": "比较串行、并行、演绎和并发仿真",
+          "content": "串行故障仿真逐个注入故障，概念简单但重复计算多；并行故障仿真用机器字并行处理多个故障；演绎仿真在一次好电路传播中携带故障集合；并发仿真只在受影响的事件上更新。选择方法要看电路规模、故障数量、事件稀疏性和实现复杂度。",
+          "reference": "同一个测试向量不应被误认为只能对应一个故障：好的仿真器会复用好电路计算，并通过并行或集合传播减少重复工作。"
+        },
+        {
+          "id": "l9-diagnosis-transfer",
+          "type": "transfer",
+          "title": "迁移任务：从失败响应生成诊断实验",
+          "goal": "把fault dictionary用于定位",
+          "content": "有三个候选故障F1、F2、F3，当前测试T1都失败。请设计下一个测试T2，使候选故障产生尽可能不同的响应，并说明如何更新fault dictionary、如何处理多个故障仍然等价的情况。",
+          "reference": "合格答案要包含候选响应表、区分度最高的下一测试、更新候选集合以及“无法唯一定位”时的报告方式。"
         }
       ],
       "exercises": [
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "故障覆盖率和故障诊断分别回答什么问题？"
+          "prompt": "故障覆盖率和故障诊断分别回答什么问题？",
+          "answer": "覆盖率回答能检测多少，诊断回答可能坏在哪里",
+          "rubric": [
+            "区分检测能力与定位能力",
+            "说明二者的工程用途"
+          ]
         }
       ],
-      "version": 4,
-      "updatedAt": "2026-08-29T23:23:46+00:00",
+      "version": "4.1",
+      "updatedAt": "2026-08-30T15:52:52.318523+00:00",
       "teaching": {
         "lessonIntro": "一颗芯片在实验室里“功能正确”，并不代表量产时每一颗都能可靠工作。存储器阵列尤其容易出现单元、字线、位线和译码相关缺陷；测试工程师不仅要判断某个地址是否失败，还要回答：故障是否被激活，失败是否真的传播到输出，究竟是哪个物理位置或哪类故障，是否可以用备用行列修复，以及修复信息怎样从测试阶段可靠保存到上电运行阶段。本课将从故障仿真和逻辑诊断出发，逐步建立memory diagnosis、冗余分析、BIRA、BISR、熔丝与寄存器之间的因果链，并说明修复决策如何影响良率、面积、测试时间和现场风险。重点不是记住缩写，而是能够追踪一次读写操作中的信号、状态和候选故障集合。",
         "sections": [
@@ -1432,6 +1680,20 @@
             "workedExample": "考虑两种启动配置方案。方案A使用易失repair register：上电复位后，控制器先shift一串配置，例如使能SR=1、替换R0、使能SC=1、替换C1；capture后执行update，随后才开放memory访问。方案B把同样信息写入eFuse：量产时执行一次program并回读，后续每次上电自动加载。若某芯片失败集合为R0C1、R2C1，方案A可以在实验室快速改写配置来比较“替换R0”与“替换C1”两种方案，但断电后信息消失；方案B适合量产固化，却必须验证熔丝编程电压窗口、位序、读回值和不可逆错误。若测试时间严格受限，增加备用列可能减少失败记录数量和后续重测，但会增加面积和比较器数量。正确选择取决于缺陷空间分布、可接受启动时间、熔丝可靠性和每颗芯片的测试流程，而不是单独追求最高覆盖率。",
             "misconception": "误解：备用资源越多、测试序列越长，产品良率就一定越高。备用资源有面积和延迟代价，过长测试也增加成本；错误的诊断或不可靠的熔丝加载甚至会把可修复缺陷转化为系统性风险。",
             "check": "请为一个有一条备用行和一条备用列的产品设计放行条件，至少包含原始失败记录、BIRA结果、配置回读、修复后重测和不可修复判定，并说明为什么每一项都不能省略。"
+          },
+          {
+            "title": "故障折叠与高效仿真",
+            "explanation": "等价、支配和多种仿真算法共同减少故障模拟成本，但不能改变覆盖率定义。",
+            "workedExample": "用一个小型组合电路画出故障集合、折叠代表和并行仿真批次。",
+            "misconception": "删掉故障不等于忽略故障，前提是保存等价/支配映射。",
+            "check": "解释fault collapsing为什么不会自动提高coverage。"
+          },
+          {
+            "title": "从检测到诊断",
+            "explanation": "检测只回答是否失败，诊断还需要设计能区分候选故障的测试和响应字典。",
+            "workedExample": "用T1筛选候选，再用T2最大化候选响应差异。",
+            "misconception": "失败地址或失败输出不一定就是物理故障位置。",
+            "check": "设计一个两轮诊断流程。"
           }
         ],
         "summary": "本课建立了一条完整链路：测试模式先通过写入和状态转换激活故障，再让错误沿存储器读出路径传播，最后在输出或压缩响应处观察；故障仿真用这种差异判断检测能力，诊断则把地址、数据背景、读写方向和时间关系转化为候选故障约束。对memory而言，失败分布可映射为坏单元、坏行、坏列或共享外围问题。BIRA依据失败集合与备用行列的覆盖关系做修复判定，BISR通过shift、capture、update以及熔丝或寄存器配置把映射带入正常访问。最终工程目标不是孤立地最大化覆盖率，而是在诊断分辨率、修复可靠性、测试成本、面积、启动行为和良率之间取得可验证的平衡。",
@@ -1545,7 +1807,12 @@
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "BIST、BIRA 和 BISR 在存储器测试中分别承担什么职责？"
+          "prompt": "BIST、BIRA 和 BISR 在存储器测试中分别承担什么职责？",
+          "answer": "BIST执行测试，BIRA分析修复，BISR应用修复",
+          "rubric": [
+            "三者职责对应准确",
+            "说明测试与修复的先后关系"
+          ]
         }
       ],
       "version": 4,
@@ -1697,17 +1964,46 @@
           "title": "课堂回顾",
           "goal": "形成可提取的知识结构",
           "content": "本课建立了一个跨数字、模拟和物理层的 DFT 推理框架。IEEE 1149.1 解决芯片边界和板级互连访问，IEEE 1500 通过 core wrapper 管理嵌入式核心的隔离、控制和观察。数字故障分析必须依次回答故障是否被激活、差异能否传播、结果能否观察。ADC/DAC 测试把连续信号转化为参数窗口和测量序列，延迟故障要求 launch-capture 时序，物理缺陷要求关注真实失效机制，软错误和高速 I/O 则需要瞬态、统计和信号完整性视角。最终，制造测试不是追求抽象的最高覆盖率，而是在缺陷逃逸、误判、测试成本、功耗、良率和现场可靠性之间做有依据的工程优化。"
+        },
+        {
+          "id": "l11-ams-model",
+          "type": "explain",
+          "title": "模拟故障不能只用0和1描述",
+          "goal": "建立模拟/混合信号故障模型",
+          "content": "数字故障模型主要观察逻辑值差异，而模拟和混合信号测试还要观察连续量：增益、偏置、线性度、失真、噪声、抖动、建立时间、电流和频率响应。ADC可能出现offset、gain、INL/DNL、missing code；PLL可能出现锁定时间、频率偏差和相位噪声；电源和模拟环路还可能受到泄漏与负载变化影响。测试点必须把这些连续性质转换成可测量的码、时间或统计指标。",
+          "reference": "同一个ADC数字输出码错误，可能来自输入源、采样保持、比较器、参考电压或数字校准逻辑；只观察最终码不能直接定位模拟物理故障。"
+        },
+        {
+          "id": "l11-core-access",
+          "type": "whiteboard",
+          "title": "白板推演：Core wrapper解决什么边界问题",
+          "goal": "区分1149.1与IEEE 1500的访问对象",
+          "content": "1149.1主要围绕芯片引脚提供边界控制和观察；IEEE 1500围绕嵌入式core提供wrapper边界、隔离、串行装载和捕获。SoC测试访问机制必须回答三个问题：当前测试对象是谁、哪些信号要隔离、响应从哪里出来。没有core wrapper时，顶层边界扫描不一定能高效控制和观察core内部状态。",
+          "reference": "把pin-level access和core-level access画成两层边界，比较它们能控制和观察的位置，不要把两个标准简单理解成上下代替关系。"
+        },
+        {
+          "id": "l11-trends-transfer",
+          "type": "transfer",
+          "title": "迁移任务：为先进SoC选择DFT组合",
+          "goal": "综合考虑层次化测试与新工艺风险",
+          "content": "为一个包含数字逻辑、SRAM、DSP和ADC的先进SoC提出DFT组合。必须覆盖：数字scan/ATPG、存储器MBIST/BISR、DSP core wrapper、ADC测试点、功耗控制、测试压缩和失效诊断。请指出每个机制覆盖的故障类别及其盲区。",
+          "reference": "方案不应只罗列名词；要明确每种机制的控制点、观察点、故障模型、测试时间、功耗和诊断边界。"
         }
       ],
       "exercises": [
         {
           "id": "e1",
           "type": "short-answer",
-          "prompt": "为什么 IEEE 1500 不能简单等同于 IEEE 1149.1？"
+          "prompt": "为什么 IEEE 1500 不能简单等同于 IEEE 1149.1？",
+          "answer": "1500面向嵌入式核心，1149.1面向边界和板级互连",
+          "rubric": [
+            "指出测试对象不同",
+            "指出访问与应用层级不同"
+          ]
         }
       ],
-      "version": 4,
-      "updatedAt": "2026-08-29T23:23:46+00:00",
+      "version": "4.1",
+      "updatedAt": "2026-08-30T15:52:52.318523+00:00",
       "teaching": {
         "lessonIntro": "在数字逻辑中，我们常用 stuck-at-0/1 和故障覆盖率描述测试效果；但真实 SoC 的失效往往不是“某根线永远为 0”。嵌入式核心可能无法直接接触，ADC/DAC 的问题表现为增益误差、失调、非线性或噪声，高速 I/O 则可能只在特定电压、温度、负载和数据模式下出错。先进节点还会出现延迟缺陷、局部物理缺陷和软错误。因而，DFT（Design for Testability，可测试性设计）本质上不是简单增加扫描链，而是设计一条可控、可激励、可传播、可观察且可判定的证据链：测试模式产生什么激励，缺陷如何影响内部状态，结果在哪里被测量，以及测试成本和误判风险是否可接受。本课从 IEEE 1500 与 IEEE 1149.1 的边界开始，逐步建立模拟混合信号、时序故障、可靠性和高速接口测试的统一分析框架。",
         "sections": [
@@ -1752,6 +2048,20 @@
             "workedExample": "假设某 SoC 有两种方案。方案 A 使用低速 scan 测试，测试时间 10 ms、功耗 0.4 W，可覆盖稳态 stuck-at 和部分 transition fault；方案 B 增加 at-speed capture、I/O loopback 和片上 ADC 监测，测试时间 18 ms、功耗 0.9 W，可发现高速互连和参考电压异常，但测试功耗可能造成 IR drop，反而产生假失败。工程上可采用分层序列：第一阶段 shift/capture 检查基本数字结构；第二阶段以较低频率做 AMS loopback；第三阶段只对风险最高的 I/O 运行 at-speed PRBS。若某颗芯片在第三阶段失败，先重复两次并改变数据种子，记录 BER、温度和电源电压，而不是立即判定为永久缺陷。该策略牺牲部分测试流程复杂度，换取较低的平均测试时间和更少的误判。",
             "misconception": "“覆盖率越高，产品一定越可靠、测试方案一定越好”忽略了故障模型和成本。若新增图形只覆盖重复的 stuck-at 故障，却增加大量功耗；或测试限值过紧导致良品误杀，良率和成本可能变差。coverage 必须与失效机制、逃逸风险、测试时间和误判率一起评价。",
             "check": "在测试时间固定的情况下，你会优先增加一组 stuck-at 图形，还是增加一次高速 I/O PRBS 和一次 ADC 参考电压检查？请先说明产品的失效风险假设，再解释你的取舍依据。"
+          },
+          {
+            "title": "模拟混合信号与层次化SoC测试",
+            "explanation": "模拟测试要把连续物理量转化为可测指标，core测试要把层次边界显式化；二者都依赖正确的控制点和观察点。",
+            "workedExample": "比较ADC最终码测试、环回测试和内部模拟观测点的覆盖与定位能力。",
+            "misconception": "有边界扫描不等于所有core内部模拟/数字节点都可访问。",
+            "check": "为包含ADC、SRAM和DSP的SoC画出测试访问层次。"
+          },
+          {
+            "title": "纳米工艺时代的DFT权衡",
+            "explanation": "工艺缩小带来更高密度，也放大功耗、串扰、时序、可靠性和测试数据规模问题。",
+            "workedExample": "用测试压缩、功耗分区、低速/高速测试和诊断策略构成一张量产方案表。",
+            "misconception": "先进工艺不是只需要更高fault coverage，还需要更贴近真实缺陷的模型。",
+            "check": "列出三个不能由传统stuck-at coverage直接反映的先进工艺风险。"
           }
         ],
         "summary": "本课建立了一个跨数字、模拟和物理层的 DFT 推理框架。IEEE 1149.1 解决芯片边界和板级互连访问，IEEE 1500 通过 core wrapper 管理嵌入式核心的隔离、控制和观察。数字故障分析必须依次回答故障是否被激活、差异能否传播、结果能否观察。ADC/DAC 测试把连续信号转化为参数窗口和测量序列，延迟故障要求 launch-capture 时序，物理缺陷要求关注真实失效机制，软错误和高速 I/O 则需要瞬态、统计和信号完整性视角。最终，制造测试不是追求抽象的最高覆盖率，而是在缺陷逃逸、误判、测试成本、功耗、良率和现场可靠性之间做有依据的工程优化。",
@@ -1785,6 +2095,441 @@
           "correct": true,
           "feedback": "Correct. Nice work.",
           "at": "2026-08-29T16:23:44+00:00"
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
+        },
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "feedback": "Correct. Nice work."
         },
         {
           "exerciseId": "e1",
@@ -2180,7 +2925,7 @@
     }
   ],
   "createdAt": "2026-08-29T16:13:04+00:00",
-  "updatedAt": "2026-08-29T23:23:58+00:00",
+  "updatedAt": "2026-08-30T15:54:45.749905+00:00",
   "versions": [
     {
       "at": "2026-08-29T16:13:04+00:00",
@@ -2228,18 +2973,5 @@
       "lessonCount": 8
     }
   ],
-  "designMethod": {
-    "inspiration": "OpenMAIC scene-based interactive classroom",
-    "principle": "one causal question per lesson; explain through scenes; require prediction before reveal; close with transfer",
-    "sceneTypes": [
-      "hook",
-      "explain",
-      "whiteboard",
-      "quiz",
-      "interactive",
-      "transfer",
-      "recap"
-    ],
-    "note": "This course uses the method and pedagogical pattern, not OpenMAIC runtime code."
-  }
+  "designMethod": "OpenMAIC-inspired scene-based active classroom, expanded with textbook chapter coverage"
 }
