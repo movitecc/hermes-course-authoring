@@ -4,6 +4,8 @@ import json
 import os
 import secrets
 import sqlite3
+import threading
+import time
 import urllib.error
 import urllib.request
 from http import HTTPStatus
@@ -22,6 +24,26 @@ SYNC_TOKEN = os.environ.get("SYNC_TOKEN", "")
 DB_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 RETRY_FEEDBACK = "还不能进入下一步。请重新检查题目中的因果条件，再做一次预测。"
+
+# Simple per-identity sliding-window rate limit for AI endpoints. Only the
+# authenticated learner identity is kept in memory; IPs and credentials are
+# never stored or logged here.
+AI_RATE_LIMIT = int(os.environ.get("AI_RATE_LIMIT", "6"))
+AI_RATE_WINDOW = float(os.environ.get("AI_RATE_WINDOW", "60"))
+_ai_calls = {}
+_ai_calls_lock = threading.Lock()
+
+
+def ai_rate_ok(identity, now=None):
+    now = time.monotonic() if now is None else now
+    with _ai_calls_lock:
+        hits = [t for t in _ai_calls.get(identity, []) if now - t < AI_RATE_WINDOW]
+        if len(hits) >= AI_RATE_LIMIT:
+            _ai_calls[identity] = hits
+            return False
+        hits.append(now)
+        _ai_calls[identity] = hits
+        return True
 
 
 def premium_enabled():
@@ -181,8 +203,8 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, OSError):
             return self.send_json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         if path.is_file():
-            content_type = "text/html; charset=utf-8" if path.suffix == ".html" else "text/plain; charset=utf-8"
-            return self.send_file(path, content_type)
+            content_types = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
+            return self.send_file(path, content_types.get(path.suffix, "text/plain; charset=utf-8"))
         self.send_json({"error": "not found"}, HTTPStatus.NOT_FOUND)
 
     def progress_response(self):
@@ -190,6 +212,13 @@ class Handler(BaseHTTPRequestHandler):
         if learner is None:
             return self.send_json({"error": "learner token required; register via POST /api/learner"}, HTTPStatus.UNAUTHORIZED)
         return self.send_json(progress_payload(learner))
+
+    def ai_allowed(self):
+        """Rate-limit AI endpoints per authenticated premium identity."""
+        if ai_rate_ok("premium:" + PREMIUM_USER):
+            return True
+        self.send_json({"error": "rate limit exceeded; please retry later"}, HTTPStatus.TOO_MANY_REQUESTS)
+        return False
 
     def ai_tutor(self, kind, lesson_id, scene_id):
         course = public_course()
@@ -232,6 +261,8 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path in ("/api/ai/explain", "/api/ai/plan"):
             if not require_premium(self):
                 return
+            if not self.ai_allowed():
+                return
             params = parse_qs(parsed.query)
             return self.ai_tutor(parsed.path.rsplit("/", 1)[-1], params.get("lesson_id", [""])[0][:80], params.get("scene_id", [""])[0][:80])
         return self.serve_static(parsed.path)
@@ -259,6 +290,8 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path in ("/api/ai/explain", "/api/ai/plan"):
             if not require_premium(self):
                 return
+            if not self.ai_allowed():
+                return
             try:
                 body = self.read_json()
             except (ValueError, json.JSONDecodeError):
@@ -266,6 +299,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.ai_tutor(parsed.path.rsplit("/", 1)[-1], str(body.get("lesson_id", ""))[:80], str(body.get("scene_id", ""))[:80])
         if parsed.path == "/api/ai/grade":
             if not require_premium(self):
+                return
+            if not self.ai_allowed():
                 return
             try:
                 body = self.read_json()
