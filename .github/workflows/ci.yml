@@ -23,3 +23,18 @@ jobs:
       - run: ./node_modules/.bin/vitest run packages/@openmaic/generation/test --exclude packages/@openmaic/generation/test/pbl-planner.test.ts
       - run: node ../../core/bin/openmaic-outline.mjs --help || true
       - run: python3 -m py_compile ../../skill/scripts/course_authoring.py
+
+  web-learning:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: python -m pip install pytest
+      - run: python -m pytest web-learning/tests -q
+      - run: python -m py_compile web-learning/app.py
+      - run: sed -n '/<script>/,/<\/script>/p' web-learning/static/index.html | sed '1s/.*<script>//;$s/<\/script>.*//' > /tmp/frontend.js && node --check /tmp/frontend.js
