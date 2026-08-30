@@ -228,3 +228,18 @@ def test_sync_requires_token_and_explicit_learner(server):
     status, data = request(base, "GET", "/api/sync/telegram?learner=someone", headers={"X-Sync-Token": "test-sync-token"})
     assert status == 200
     assert data["learner"] == "someone"
+
+
+def test_ai_rate_limit_window(server):
+    _, module = server
+    old_limit, old_window = module.AI_RATE_LIMIT, module.AI_RATE_WINDOW
+    module.AI_RATE_LIMIT, module.AI_RATE_WINDOW = 2, 60
+    module._ai_calls.clear()
+    try:
+        assert module.ai_rate_ok('premium:test', now=100.0)
+        assert module.ai_rate_ok('premium:test', now=101.0)
+        assert not module.ai_rate_ok('premium:test', now=102.0)
+        assert module.ai_rate_ok('premium:test', now=161.0)
+    finally:
+        module.AI_RATE_LIMIT, module.AI_RATE_WINDOW = old_limit, old_window
+        module._ai_calls.clear()
