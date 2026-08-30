@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "id": "数字芯片中-dft-的原理和应用-e9c50005",
+  "title": "数字芯片中 DFT 的原理和应用",
+  "topic": "数字芯片设计中的 Design-for-Testability（DFT）：测试目标、扫描链、ATPG、测试压缩、MBIST、LBIST、IEEE 1149.1 边界扫描、故障模型、覆盖率与量产应用",
+  "audience": "general adult learner",
+  "language": "中文",
+  "durationMinutes": 180,
+  "style": "clear, practical, source-grounded, and progressively technical",
+  "objectives": [
+    "建立从制造缺陷、故障模型到测试模式和量产判定的完整 DFT 视角",
+    "理解可控性、可观察性、SCOAP、扫描设计和 scan verification",
+    "能够解释故障仿真、ATPG、BIST、测试压缩和诊断的基本流程与取舍",
+    "能够比较逻辑测试、存储器测试、边界扫描、核心测试及模拟混合信号测试",
+    "能够从覆盖率、测试时间、面积、功耗、良率和诊断分辨率评价 DFT 方案"
+  ],
+  "prerequisites": [
+    "数字逻辑基础：组合逻辑、时序逻辑、触发器和有限状态机",
+    "了解基本 Verilog/SystemVerilog 阅读方式",
+    "具备二进制、布尔代数和基础概率概念"
+  ],
+  "lessons": [
+    {
+      "id": "l1",
+      "title": "DFT 基础：为什么芯片需要可测试性",
+      "objectives": [
+        "理解制造测试与设计验证的区别",
+        "掌握可控性、可观察性、故障模型和覆盖率概念"
+      ],
+      "keyConcepts": [
+        "DFT目标",
+        "可控性",
+        "可观察性",
+        "stuck-at故障",
+        "测试覆盖率"
+      ],
+      "content": "本课建立 DFT 的全局框架。设计验证关注“设计是否符合规格”，而制造测试关注“每一颗出厂芯片是否按规格工作”。由于内部节点通常无法直接访问，DFT 通过额外结构提高内部状态的可控性和可观察性。常见故障模型包括 stuck-at-0/1、transition、bridging 和 memory fault。测试覆盖率衡量测试模式能够检测的目标故障比例，但高覆盖率不等于所有缺陷都能被发现。工程上还要综合测试时间、面积、功耗、良率和诊断分辨率。",
+      "scenes": [
+        {
+          "id": "l1-s1",
+          "type": "slide",
+          "title": "DFT 基础：为什么芯片需要可测试性",
+          "content": "本课建立 DFT 的全局框架。设计验证关注“设计是否符合规格”，而制造测试关注“每一颗出厂芯片是否按规格工作”。由于内部节点通常无法直接访问，DFT 通过额外结构提高内部状态的可控性和可观察性。常见故障模型包括 stuck-at-0/1、transition、bridging 和 memory fault。测试覆盖率衡量测试模式能够检测的目标故障比例，但高覆盖率不等于所有缺陷都能被发现。工程上还要综合测试时间、面积、功耗、良率和诊断分辨率。"
+        },
+        {
+          "id": "l1-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "为什么内部节点的可控性和可观察性是 DFT 的核心？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l2",
+      "title": "可控性、可观察性与扫描测试基础",
+      "objectives": [
+        "解释内部节点难以测试的根本原因",
+        "说明 scan test 如何把时序电路转化为易测试结构"
+      ],
+      "keyConcepts": [
+        "可控性",
+        "可观察性",
+        "全扫描",
+        "部分扫描",
+        "移位与捕获"
+      ],
+      "content": "组合逻辑的测试依赖输入可控性和输出可观察性；时序逻辑增加了状态初始化和状态传播的困难。扫描设计把普通触发器替换或增强为 scan flip-flop，在 Shift 模式下串成移位寄存器，在 Capture 模式下捕获组合逻辑响应，再 Shift 出去比较。全扫描通常降低 ATPG 难度，但会带来面积、时序、功耗和测试数据量代价。",
+      "scenes": [
+        {
+          "id": "l2-s1",
+          "type": "slide",
+          "title": "可控性、可观察性与扫描测试基础",
+          "content": "组合逻辑的测试依赖输入可控性和输出可观察性；时序逻辑增加了状态初始化和状态传播的困难。扫描设计把普通触发器替换或增强为 scan flip-flop，在 Shift 模式下串成移位寄存器，在 Capture 模式下捕获组合逻辑响应，再 Shift 出去比较。全扫描通常降低 ATPG 难度，但会带来面积、时序、功耗和测试数据量代价。"
+        },
+        {
+          "id": "l2-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "scan 测试中 Shift 阶段和 Capture 阶段分别做什么？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l3",
+      "title": "Scan Cell、Scan Chain 与测试时序",
+      "objectives": [
+        "掌握 scan cell、scan enable、scan in/out 的作用",
+        "能够分析一条扫描链的移位和捕获时序"
+      ],
+      "keyConcepts": [
+        "scan cell",
+        "scan chain",
+        "scan enable",
+        "shift/capture",
+        "锁存与时钟"
+      ],
+      "content": "典型 scan cell 由功能数据输入、scan 输入、选择器和触发器组成。scan_enable=1 时执行移位，scan_enable=0 时执行功能捕获。一个基本测试序列是：先 Shift 装载初始状态，再关闭 scan_enable 进行一个或多个 Capture 周期，最后重新打开 scan_enable 把响应移出。实际芯片需要处理多时钟域、锁存器、异步复位、时钟门控、链平衡和 X 值传播。",
+      "scenes": [
+        {
+          "id": "l3-s1",
+          "type": "slide",
+          "title": "Scan Cell、Scan Chain 与测试时序",
+          "content": "典型 scan cell 由功能数据输入、scan 输入、选择器和触发器组成。scan_enable=1 时执行移位，scan_enable=0 时执行功能捕获。一个基本测试序列是：先 Shift 装载初始状态，再关闭 scan_enable 进行一个或多个 Capture 周期，最后重新打开 scan_enable 把响应移出。实际芯片需要处理多时钟域、锁存器、异步复位、时钟门控、链平衡和 X 值传播。"
+        },
+        {
+          "id": "l3-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "scan_enable 在移位和捕获时分别处于什么状态？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l4",
+      "title": "ATPG、故障模型与测试压缩",
+      "objectives": [
+        "理解 ATPG 如何生成检测目标故障的模式",
+        "区分 stuck-at、transition 和 path-delay 测试",
+        "解释压缩器、解压器与 X-masking 的作用"
+      ],
+      "keyConcepts": [
+        "ATPG",
+        "fault activation",
+        "fault propagation",
+        "transition fault",
+        "test compression"
+      ],
+      "content": "ATPG 的基本思想是先激活故障，再把故障效应传播到可观察点，最后由测试响应判定。stuck-at 模型适合检测大量静态缺陷；transition 模型需要 launch/capture 时序来覆盖速度相关缺陷。现代 SoC 常用 on-chip decompressor 将少量外部数据展开为多条 scan 链，并用 compactor 压缩响应。压缩会受到 X 值污染、别名(aliasing)、功耗峰值和诊断质量的约束。",
+      "scenes": [
+        {
+          "id": "l4-s1",
+          "type": "slide",
+          "title": "ATPG、故障模型与测试压缩",
+          "content": "ATPG 的基本思想是先激活故障，再把故障效应传播到可观察点，最后由测试响应判定。stuck-at 模型适合检测大量静态缺陷；transition 模型需要 launch/capture 时序来覆盖速度相关缺陷。现代 SoC 常用 on-chip decompressor 将少量外部数据展开为多条 scan 链，并用 compactor 压缩响应。压缩会受到 X 值污染、别名(aliasing)、功耗峰值和诊断质量的约束。"
+        },
+        {
+          "id": "l4-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "ATPG 生成测试模式时需要先激活故障还是先传播故障效应？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l5",
+      "title": "MBIST：存储器内建自测试",
+      "objectives": [
+        "解释 SRAM/嵌入式存储器为何需要专用测试",
+        "掌握 March 算法的读写方向和故障覆盖思路"
+      ],
+      "keyConcepts": [
+        "MBIST",
+        "March algorithm",
+        "memory fault",
+        "memory repair",
+        "BISR"
+      ],
+      "content": "嵌入式 SRAM 的地址空间大、内部节点不可直接访问，依赖通用 scan 难以高效测试，因此通常加入 MBIST 控制器。March 测试由一系列沿地址升序或降序执行的读写元素组成，例如写 0、升序读 0 写 1、降序读 1 写 0。它可以覆盖 stuck-at、transition、address decoder、coupling 等多类存储器故障。量产芯片还常配合 BIRA/BISR 对冗余行列进行分析和修复。",
+      "scenes": [
+        {
+          "id": "l5-s1",
+          "type": "slide",
+          "title": "MBIST：存储器内建自测试",
+          "content": "嵌入式 SRAM 的地址空间大、内部节点不可直接访问，依赖通用 scan 难以高效测试，因此通常加入 MBIST 控制器。March 测试由一系列沿地址升序或降序执行的读写元素组成，例如写 0、升序读 0 写 1、降序读 1 写 0。它可以覆盖 stuck-at、transition、address decoder、coupling 等多类存储器故障。量产芯片还常配合 BIRA/BISR 对冗余行列进行分析和修复。"
+        },
+        {
+          "id": "l5-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "MBIST 中 March 算法为什么要包含升序和降序访问？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l6",
+      "title": "LBIST 与片上测试控制",
+      "objectives": [
+        "理解 LBIST 与外部 ATPG 的差异",
+        "说明 PRPG、MISR、签名和测试控制器的基本结构"
+      ],
+      "keyConcepts": [
+        "LBIST",
+        "PRPG",
+        "MISR",
+        "signature",
+        "测试控制器"
+      ],
+      "content": "LBIST 使用伪随机模式生成器 PRPG 激励内部逻辑，并用多输入特征寄存器 MISR 压缩响应，最终比较签名。优点是测试数据量和外部引脚带宽需求较低，可支持启动自检或现场诊断；缺点是随机模式对随机难测故障覆盖不足、功耗可能较高，并存在签名混叠概率。工程设计常结合 deterministic top-up patterns、测试点和安全策略。",
+      "scenes": [
+        {
+          "id": "l6-s1",
+          "type": "slide",
+          "title": "LBIST 与片上测试控制",
+          "content": "LBIST 使用伪随机模式生成器 PRPG 激励内部逻辑，并用多输入特征寄存器 MISR 压缩响应，最终比较签名。优点是测试数据量和外部引脚带宽需求较低，可支持启动自检或现场诊断；缺点是随机模式对随机难测故障覆盖不足、功耗可能较高，并存在签名混叠概率。工程设计常结合 deterministic top-up patterns、测试点和安全策略。"
+        },
+        {
+          "id": "l6-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "LBIST 中 PRPG 和 MISR 分别承担什么职责？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l7",
+      "title": "IEEE 1149.1/JTAG 与边界扫描",
+      "objectives": [
+        "掌握 TAP、TCK/TMS/TDI/TDO 和基本指令寄存器的关系",
+        "说明边界扫描在板级互连测试和调试中的应用"
+      ],
+      "keyConcepts": [
+        "JTAG",
+        "TAP controller",
+        "boundary scan",
+        "BYPASS",
+        "EXTEST/INTEST"
+      ],
+      "content": "IEEE 1149.1 通过四线或五线测试访问端口提供标准化访问。TAP 控制器由 TCK 驱动，并根据 TMS 序列在 Test-Logic-Reset、Capture、Shift、Update 等状态间转换。边界扫描寄存器位于芯片 I/O 附近，EXTEST 可驱动一个器件的引脚并在另一个器件采样，从而检测 PCB 互连。BYPASS、IDCODE 和 SAMPLE/PRELOAD 等指令支持设备识别、旁路和非侵入观测。",
+      "scenes": [
+        {
+          "id": "l7-s1",
+          "type": "slide",
+          "title": "IEEE 1149.1/JTAG 与边界扫描",
+          "content": "IEEE 1149.1 通过四线或五线测试访问端口提供标准化访问。TAP 控制器由 TCK 驱动，并根据 TMS 序列在 Test-Logic-Reset、Capture、Shift、Update 等状态间转换。边界扫描寄存器位于芯片 I/O 附近，EXTEST 可驱动一个器件的引脚并在另一个器件采样，从而检测 PCB 互连。BYPASS、IDCODE 和 SAMPLE/PRELOAD 等指令支持设备识别、旁路和非侵入观测。"
+        },
+        {
+          "id": "l7-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "JTAG 的 EXTEST 指令主要用于什么？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l8",
+      "title": "DFT 流程、量产指标与综合项目",
+      "objectives": [
+        "串联 RTL、综合、插入、ATPG、仿真和 ATE 的完整流程",
+        "能够在覆盖率、功耗、面积、时序和测试时间之间做权衡",
+        "完成一个小型 DFT 方案设计"
+      ],
+      "keyConcepts": [
+        "DFT insertion",
+        "ATPG signoff",
+        "ATE",
+        "coverage closure",
+        "yield learning"
+      ],
+      "content": "完整 DFT 流程通常包括规格定义、DFT 规划、scan/MBIST/JTAG 插入、规则检查、ATPG、故障仿真、功耗分析、模式签核、ATE 上机和量产数据回收。签核不只看 stuck-at 覆盖率，还要关注 transition 覆盖率、未检测故障分类、链完整性、pattern 数量、shift/capture 功耗、测试时间、诊断能力和良率学习。综合项目要求为一个带 SRAM 和多时钟域的模块提出 scan、MBIST、JTAG 和压缩策略，并写出风险与验证计划。",
+      "scenes": [
+        {
+          "id": "l8-s1",
+          "type": "slide",
+          "title": "DFT 流程、量产指标与综合项目",
+          "content": "完整 DFT 流程通常包括规格定义、DFT 规划、scan/MBIST/JTAG 插入、规则检查、ATPG、故障仿真、功耗分析、模式签核、ATE 上机和量产数据回收。签核不只看 stuck-at 覆盖率，还要关注 transition 覆盖率、未检测故障分类、链完整性、pattern 数量、shift/capture 功耗、测试时间、诊断能力和良率学习。综合项目要求为一个带 SRAM 和多时钟域的模块提出 scan、MBIST、JTAG 和压缩策略，并写出风险与验证计划。"
+        },
+        {
+          "id": "l8-s2",
+          "type": "discussion",
+          "title": "工程讨论",
+          "prompt": "结合本课概念，说明一个可能的设计取舍。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "DFT signoff 除了故障覆盖率还应关注哪些量产指标？"
+        }
+      ],
+      "version": 2,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l9",
+      "title": "故障仿真与逻辑诊断",
+      "objectives": [
+        "区分逻辑仿真与故障仿真的目标",
+        "理解串行、并行、并发和演绎故障仿真的基本思想",
+        "说明故障诊断如何从失败响应缩小候选故障集合"
+      ],
+      "keyConcepts": [
+        "logic simulation",
+        "fault simulation",
+        "fault list",
+        "fault dropping",
+        "diagnosis",
+        "候选故障"
+      ],
+      "content": "故障仿真不是验证功能是否正确，而是评估给定测试模式能检测哪些故障。典型流程是建立无故障电路响应，再将故障注入并比较输出；已被检测的故障可以从故障列表中删除。串行仿真实现简单但速度慢，并行和并发方法利用机器字或事件共享提高效率。诊断进一步反向利用失败响应和模式信息，对候选故障进行排序或定位；覆盖率回答“能检测多少”，诊断回答“可能坏在哪里”。",
+      "scenes": [
+        {
+          "id": "l9-s1",
+          "type": "slide",
+          "title": "故障仿真和诊断的角色",
+          "content": "逻辑仿真评估无故障设计的行为；故障仿真评估测试模式对故障模型的检测能力；诊断则根据失败响应反推候选故障。三者共同连接 RTL/门级设计、ATPG 和量产失效分析。"
+        },
+        {
+          "id": "l9-s2",
+          "type": "discussion",
+          "title": "覆盖率不等于诊断率",
+          "prompt": "为什么两个测试集可能有相近的故障覆盖率，却有不同的失效定位能力？"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "故障覆盖率和故障诊断分别回答什么问题？"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l10",
+      "title": "存储器诊断、冗余分析与 BISR",
+      "objectives": [
+        "掌握 RAM 常见功能故障和动态故障的测试思路",
+        "理解 MBIST、故障诊断、BIRA 与 BISR 的关系",
+        "能够解释冗余行列如何改善存储器良率"
+      ],
+      "keyConcepts": [
+        "memory fault model",
+        "March test",
+        "fault site indicator",
+        "BIRA",
+        "BISR",
+        "redundancy analysis",
+        "repair rate"
+      ],
+      "content": "存储器测试不仅要判断读写结果，还要识别地址译码、耦合、转换和动态故障。March 算法通过规定地址方向以及读写顺序，系统地激活并观察不同故障。MBIST 负责执行测试，诊断逻辑记录故障位置，BIRA 根据冗余行列资源计算修复方案，BISR 将修复信息加载到芯片中。工程评价不能只看覆盖率，还要看修复率、冗余开销、测试时间和失效分析能力。",
+      "scenes": [
+        {
+          "id": "l10-s1",
+          "type": "slide",
+          "title": "从 MBIST 到 BISR",
+          "content": "MBIST 执行算法，诊断模块记录故障，BIRA 选择冗余资源，BISR 在启动或测试阶段应用修复映射。"
+        },
+        {
+          "id": "l10-s2",
+          "type": "discussion",
+          "title": "修复与测试取舍",
+          "prompt": "为什么提高冗余资源并不一定是最优的量产方案？"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "BIST、BIRA 和 BISR 在存储器测试中分别承担什么职责？"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    },
+    {
+      "id": "l11",
+      "title": "DFT 扩展：核心测试、模拟混合信号与先进趋势",
+      "objectives": [
+        "理解 IEEE 1500 核心测试与 IEEE 1149.1 边界扫描的定位差异",
+        "认识模拟/混合信号测试与数字故障模型的差异",
+        "能够识别延迟、软错误、信号完整性和高性能 I/O 带来的新测试挑战"
+      ],
+      "keyConcepts": [
+        "IEEE 1500",
+        "core wrapper",
+        "AMS test",
+        "ADC/DAC",
+        "delay defect",
+        "soft error",
+        "signal integrity",
+        "yield"
+      ],
+      "content": "SoC 集成多个可复用核心后，测试访问必须分层管理。IEEE 1149.1 主要面向芯片引脚和板级互连，IEEE 1500 则通过 wrapper 为嵌入式核心提供隔离、访问和层次化测试控制。模拟和混合信号电路具有连续值、参数规格和测量仪器依赖，不能简单套用数字 stuck-at 覆盖率。先进节点还需要关注延迟缺陷、工艺波动、软错误、电源噪声、信号完整性、FPGA、MEMS 和高速 I/O。",
+      "scenes": [
+        {
+          "id": "l11-s1",
+          "type": "slide",
+          "title": "从数字 DFT 到 SoC/AMS 测试",
+          "content": "数字 DFT 关注逻辑状态和故障效应；核心测试关注访问隔离与层次化复用；AMS 测试关注连续信号、参数误差和测量路径。"
+        },
+        {
+          "id": "l11-s2",
+          "type": "discussion",
+          "title": "综合方案评审",
+          "prompt": "为一个含 CPU、SRAM、模拟 ADC 和高速 I/O 的 SoC 选择测试结构，并说明理由。"
+        }
+      ],
+      "exercises": [
+        {
+          "id": "e1",
+          "type": "short-answer",
+          "prompt": "为什么 IEEE 1500 不能简单等同于 IEEE 1149.1？"
+        }
+      ],
+      "version": 1,
+      "updatedAt": "2026-08-29T23:23:46+00:00"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "session-5f61ad791e",
+      "state": "paused",
+      "lessonId": "l1",
+      "turn": 3,
+      "answers": [
+        {
+          "exerciseId": "e1",
+          "answer": "可控制是把我们想要设定的值送到测试点，可观察是预设值送到测试点后经过逻辑运算结果是否符合预期",
+          "correct": true,
+          "feedback": "Correct. Nice work.",
+          "at": "2026-08-29T16:23:44+00:00"
+        }
+      ],
+      "startedAt": "2026-08-29T16:17:12+00:00",
+      "updatedAt": "2026-08-29T16:25:09+00:00",
+      "transcript": [
+        {
+          "mode": "lecture",
+          "message": "",
+          "at": "2026-08-29T16:17:18+00:00"
+        },
+        {
+          "mode": "lecture",
+          "message": "",
+          "at": "2026-08-29T16:23:54+00:00"
+        }
+      ]
+    }
+  ],
+  "progress": {
+    "completedLessons": [
+      "l1"
+    ],
+    "weakAreas": [],
+    "scores": [
+      {
+        "lessonId": "l1",
+        "exerciseId": "e1",
+        "correct": true,
+        "at": "2026-08-29T16:23:44+00:00"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "format": "md",
+      "path": "/home/movit/.hermes/workspace/course-authoring/courses/数字芯片中-dft-的原理和应用-e9c50005/artifacts/数字芯片中-dft-的原理和应用.md",
+      "createdAt": "2026-08-29T23:23:58+00:00"
+    }
+  ],
+  "createdAt": "2026-08-29T16:13:04+00:00",
+  "updatedAt": "2026-08-29T23:23:58+00:00",
+  "versions": [
+    {
+      "at": "2026-08-29T16:13:04+00:00",
+      "reason": "created",
+      "lessonCount": 0
+    },
+    {
+      "at": "2026-08-29T16:14:47+00:00",
+      "reason": "lesson:l1",
+      "lessonCount": 1
+    },
+    {
+      "at": "2026-08-29T16:14:48+00:00",
+      "reason": "lesson:l2",
+      "lessonCount": 2
+    },
+    {
+      "at": "2026-08-29T16:14:49+00:00",
+      "reason": "lesson:l3",
+      "lessonCount": 3
+    },
+    {
+      "at": "2026-08-29T16:14:49+00:00",
+      "reason": "lesson:l4",
+      "lessonCount": 4
+    },
+    {
+      "at": "2026-08-29T16:14:50+00:00",
+      "reason": "lesson:l5",
+      "lessonCount": 5
+    },
+    {
+      "at": "2026-08-29T16:14:50+00:00",
+      "reason": "lesson:l6",
+      "lessonCount": 6
+    },
+    {
+      "at": "2026-08-29T16:14:51+00:00",
+      "reason": "lesson:l7",
+      "lessonCount": 7
+    },
+    {
+      "at": "2026-08-29T16:14:52+00:00",
+      "reason": "lesson:l8",
+      "lessonCount": 8
+    }
+  ]
+}

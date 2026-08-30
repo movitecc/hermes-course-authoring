@@ -1,0 +1,15 @@
+services:
+  learning-web:
+    build: .
+    container_name: hermes-learning-web
+    restart: unless-stopped
+    environment:
+      PORT: "3001"
+      LEARNING_DB: /app/data/learning.sqlite3
+    volumes:
+      - learning_data:/app/data
+    expose:
+      - "3001"
+
+volumes:
+  learning_data:
