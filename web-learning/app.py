@@ -163,6 +163,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     init_db()
-    server = ThreadingHTTPServer(("0.0.0.0", int(os.environ.get("PORT", "3001"))), Handler)
+    server = ThreadingHTTPServer((os.environ.get("HOST", "127.0.0.1"), int(os.environ.get("PORT", "3001"))), Handler)
     print(f"learning web listening on {server.server_address}", flush=True)
     server.serve_forever()

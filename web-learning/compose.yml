@@ -5,15 +5,15 @@ services:
     build: .
     container_name: hermes-learning-web
     restart: unless-stopped
+    network_mode: host
     env_file:
       - .env
     environment:
+      HOST: "127.0.0.1"
       PORT: "3001"
       LEARNING_DB: /app/data/learning.sqlite3
     volumes:
       - learning_data:/app/data
-    ports:
-      - "127.0.0.1:3001:3001"
 
 volumes:
   learning_data:
