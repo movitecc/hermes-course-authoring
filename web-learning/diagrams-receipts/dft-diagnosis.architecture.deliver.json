@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/movit/hermes-course-authoring/web-learning/diagrams-src/dft-diagnosis.architecture.json",
+  "output": "/home/movit/hermes-course-authoring/web-learning/static/diagrams/dft-diagnosis.architecture.html",
+  "specification": {
+    "sha256": "ae293b03c12379f66efb9d686e98699f3676eaffc0b29d986f5409b36b6bc0b9",
+    "bytes": 2332
+  },
+  "artifact": {
+    "sha256": "b73757c18a892790b266a31933069763656dda8138359bf22d775a6a52145137",
+    "bytes": 703078
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

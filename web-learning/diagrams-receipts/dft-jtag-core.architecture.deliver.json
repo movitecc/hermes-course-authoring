@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/movit/hermes-course-authoring/web-learning/diagrams-src/dft-jtag-core.architecture.json",
+  "output": "/home/movit/hermes-course-authoring/web-learning/static/diagrams/dft-jtag-core.architecture.html",
+  "specification": {
+    "sha256": "5cbdd4f962d89e03f6e0ccf3c5e8f63e43546a3abf705f1e44ed8eac469bfe63",
+    "bytes": 2982
+  },
+  "artifact": {
+    "sha256": "c80a6f35420472d045a14bfdaa9719a9420198bd601aa0683023f8a12bba71cc",
+    "bytes": 706978
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

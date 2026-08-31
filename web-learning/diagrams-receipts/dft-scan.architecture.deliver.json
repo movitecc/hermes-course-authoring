@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/movit/hermes-course-authoring/web-learning/diagrams-src/dft-scan.architecture.json",
+  "output": "/home/movit/hermes-course-authoring/web-learning/static/diagrams/dft-scan.architecture.html",
+  "specification": {
+    "sha256": "15e9a7bfb2e8c2c78d95a3e7de44a964f54a0277262354fc2259ef3c4cbcaa01",
+    "bytes": 2977
+  },
+  "artifact": {
+    "sha256": "e1765f558ffb0fb3803c53c1c30edae83355ee8c5cf57a132141663e8241432c",
+    "bytes": 706275
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

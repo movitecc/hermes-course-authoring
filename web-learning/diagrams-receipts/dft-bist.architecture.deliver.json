@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/movit/hermes-course-authoring/web-learning/diagrams-src/dft-bist.architecture.json",
+  "output": "/home/movit/hermes-course-authoring/web-learning/static/diagrams/dft-bist.architecture.html",
+  "specification": {
+    "sha256": "76cd7fd211247b758b51a5fd3ea31f822ffa89082b4c1795d45b56038f4c32c0",
+    "bytes": 2377
+  },
+  "artifact": {
+    "sha256": "1c8d8faabcf544d42ac1109b548cd1df5e52463baa3a41854714dbedc5cd6fca",
+    "bytes": 703141
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

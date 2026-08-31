@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/movit/hermes-course-authoring/web-learning/diagrams-src/dft-atpg-compression.architecture.json",
+  "output": "/home/movit/hermes-course-authoring/web-learning/static/diagrams/dft-atpg-compression.architecture.html",
+  "specification": {
+    "sha256": "f63c0004e1956741e580a744e11a5c9acd86826f1e9547eadf38ab6acf42a2c1",
+    "bytes": 2322
+  },
+  "artifact": {
+    "sha256": "e29c6d5c2112d8ffbf46e4990f4eb67283594328e468aecf2ff4bcdf261e9cc2",
+    "bytes": 702972
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

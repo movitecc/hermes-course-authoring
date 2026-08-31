@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "故障仿真到逻辑诊断",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1180,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "n0",
+      "type": "external",
+      "label": "测试向量",
+      "sublabel": "ATPG / MBIST",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n1",
+      "type": "backend",
+      "label": "Good Circuit",
+      "sublabel": "reference",
+      "pos": [
+        230,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n2",
+      "type": "backend",
+      "label": "故障注入",
+      "sublabel": "SA / transition / coupling",
+      "pos": [
+        420,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n3",
+      "type": "backend",
+      "label": "失败证据",
+      "sublabel": "address + time + response",
+      "pos": [
+        610,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n4",
+      "type": "backend",
+      "label": "Fault Dictionary",
+      "sublabel": "candidate signatures",
+      "pos": [
+        800,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n5",
+      "type": "database",
+      "label": "诊断报告",
+      "sublabel": "unique or candidate set",
+      "pos": [
+        990,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "n0",
+      "to": "n1"
+    },
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2"
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3"
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4"
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Detection",
+      "items": [
+        "覆盖率针对已建模故障",
+        "保留地址/时序/响应"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Diagnosis",
+      "items": [
+        "候选集合逐步缩小",
+        "生成区分性测试"
+      ]
+    }
+  ]
+}

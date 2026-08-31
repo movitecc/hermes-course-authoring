@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "JTAG 与 Core Wrapper 测试访问层次",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1250,
+      560
+    ]
+  },
+  "components": [
+    {
+      "id": "tester",
+      "type": "external",
+      "label": "ATE / Debugger",
+      "sublabel": "TCK TMS TDI",
+      "pos": [
+        40,
+        250
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "tap",
+      "type": "security",
+      "label": "JTAG TAP",
+      "sublabel": "1149.1 Controller",
+      "pos": [
+        260,
+        250
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "boundary",
+      "type": "backend",
+      "label": "Boundary Cells",
+      "sublabel": "Pin control / observe",
+      "pos": [
+        500,
+        100
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "wrapper",
+      "type": "backend",
+      "label": "IEEE 1500 Wrapper",
+      "sublabel": "Core isolation",
+      "pos": [
+        500,
+        390
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "pins",
+      "type": "external",
+      "label": "Chip Pins",
+      "sublabel": "Board interconnect",
+      "pos": [
+        760,
+        100
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "core",
+      "type": "backend",
+      "label": "Embedded Core",
+      "sublabel": "DSP / CPU / IP",
+      "pos": [
+        760,
+        390
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "result",
+      "type": "database",
+      "label": "Capture / TDO",
+      "sublabel": "Test response",
+      "pos": [
+        980,
+        250
+      ],
+      "size": [
+        150,
+        60
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "tester-tap",
+      "from": "tester",
+      "to": "tap",
+      "label": "TCK/TMS/TDI",
+      "variant": "security"
+    },
+    {
+      "id": "tap-boundary",
+      "from": "tap",
+      "to": "boundary",
+      "label": "DR select / shift",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "tap-wrapper",
+      "from": "tap",
+      "to": "wrapper",
+      "label": "core test access",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "boundary-pins",
+      "from": "boundary",
+      "to": "pins",
+      "label": "pin drive / sample"
+    },
+    {
+      "id": "wrapper-core",
+      "from": "wrapper",
+      "to": "core",
+      "label": "isolate / capture"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "1149.1",
+      "items": [
+        "围绕芯片引脚",
+        "适合板级互连测试",
+        "通过TAP访问数据寄存器"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "IEEE 1500",
+      "items": [
+        "围绕嵌入式core",
+        "提供wrapper隔离",
+        "支持层次化SoC测试"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "MBIST / LBIST 测试闭环",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1180,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "n0",
+      "type": "external",
+      "label": "控制器复位",
+      "sublabel": "reset",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n1",
+      "type": "backend",
+      "label": "Seed / March初始化",
+      "sublabel": "LFSR or address order",
+      "pos": [
+        230,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n2",
+      "type": "backend",
+      "label": "产生并施加模式",
+      "sublabel": "PRPG or read/write",
+      "pos": [
+        420,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n3",
+      "type": "backend",
+      "label": "Capture响应",
+      "sublabel": "sample response",
+      "pos": [
+        610,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n4",
+      "type": "backend",
+      "label": "MISR / 比较",
+      "sublabel": "signature or expected",
+      "pos": [
+        800,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    },
+    {
+      "id": "n5",
+      "type": "database",
+      "label": "Pass / Fail",
+      "sublabel": "diagnosis entry",
+      "pos": [
+        990,
+        220
+      ],
+      "size": [
+        140,
+        70
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "e0",
+      "from": "n0",
+      "to": "n1"
+    },
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2"
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3"
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4"
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "LBIST",
+      "items": [
+        "PRPG/LFSR产生模式",
+        "MISR累积响应",
+        "比较golden signature"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "MBIST",
+      "items": [
+        "March读写序列",
+        "记录失败地址和操作",
+        "失败结果进入诊断/BISR"
+      ]
+    }
+  ]
+}

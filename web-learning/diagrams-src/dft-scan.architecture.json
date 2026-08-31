@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Scan Chain 测试数据路径",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1100,
+      520
+    ]
+  },
+  "components": [
+    {
+      "id": "ate",
+      "type": "external",
+      "label": "ATE",
+      "sublabel": "测试机",
+      "pos": [
+        40,
+        220
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "tdi",
+      "type": "backend",
+      "label": "TDI / SI",
+      "sublabel": "串行输入",
+      "pos": [
+        260,
+        220
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "scan",
+      "type": "backend",
+      "label": "Scan Cells",
+      "sublabel": "Shift / Capture",
+      "pos": [
+        490,
+        220
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "dut",
+      "type": "backend",
+      "label": "组合逻辑",
+      "sublabel": "Circuit Under Test",
+      "pos": [
+        700,
+        80
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "misr",
+      "type": "database",
+      "label": "TDO / MISR",
+      "sublabel": "响应与签名",
+      "pos": [
+        700,
+        330
+      ],
+      "size": [
+        150,
+        60
+      ]
+    },
+    {
+      "id": "judge",
+      "type": "security",
+      "label": "Pass / Fail",
+      "sublabel": "期望响应比较",
+      "pos": [
+        950,
+        220
+      ],
+      "size": [
+        150,
+        60
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "ate-in",
+      "from": "ate",
+      "to": "tdi",
+      "label": "test pattern",
+      "variant": "emphasis"
+    },
+    {
+      "id": "shift-in",
+      "from": "tdi",
+      "to": "scan",
+      "label": "shift SI"
+    },
+    {
+      "id": "capture",
+      "from": "scan",
+      "to": "dut",
+      "label": "capture",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 38
+    },
+    {
+      "id": "observe",
+      "from": "dut",
+      "to": "misr",
+      "label": "response",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "shift-out",
+      "from": "scan",
+      "to": "misr",
+      "label": "shift out",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "labelDy": 24
+    },
+    {
+      "id": "compare",
+      "from": "misr",
+      "to": "judge",
+      "label": "signature compare",
+      "fromSide": "right",
+      "toSide": "left",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "三段时序",
+      "items": [
+        "Shift：装载内部状态",
+        "Capture：让组合逻辑计算",
+        "Unload：移出响应并比较"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "关键边界",
+      "items": [
+        "SI 控制可控性",
+        "SO/MISR 提供可观察性",
+        "scan_enable 选择测试路径"
+      ]
+    }
+  ]
+}

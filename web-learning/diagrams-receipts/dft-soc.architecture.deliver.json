@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/movit/hermes-course-authoring/web-learning/diagrams-src/dft-soc.architecture.json",
+  "output": "/home/movit/hermes-course-authoring/web-learning/static/diagrams/dft-soc.architecture.html",
+  "specification": {
+    "sha256": "b2e3169c8442d15a5e5e693aacb6e5ee324eaa8675cb212323ae66dd48d61b2f",
+    "bytes": 2341
+  },
+  "artifact": {
+    "sha256": "ba5290379476d51a719f2ee079e386c36001ab40b240f40af56ee08e33d2ca64",
+    "bytes": 703022
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}
